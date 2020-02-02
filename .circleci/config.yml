@@ -2,7 +2,7 @@ version: 2.1
 
 defaults: &defaults
   docker:
-    - image: circleci/clojure:tools-deps-1.10.1.507
+    - image: circleci/clojure:tools-deps-1.10.1.502
 
 jobs:
   test:

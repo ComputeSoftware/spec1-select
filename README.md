@@ -67,6 +67,8 @@ Not supported yet... Might be easy to add?
 ### get-movie-times
 
 ```clojure
+(s/def ::movie-times-user (ssel/select ::user [::id ::addr {::addr [::zip]}]))
+
 (gen/sample (s/gen ::movie-times-user) 5)
 =>
 (#:user{:addr #:user{:zip -1, :state "", :city ""}, :first "", :id -1}
@@ -77,6 +79,13 @@ Not supported yet... Might be easy to add?
 ```
 
 ### place-order
+
+```clojure
+(s/def ::place-order
+  (ssel/select ::user [::first ::last ::addr
+                       {::addr [::street ::city ::state ::zip]}]))
+```
+
 
 ```clojure
 (s/explain ::place-order {::first "Alex" ::last "Miller" ::addr {::state "IL"}})
@@ -114,7 +123,7 @@ Not supported yet... Might be easy to add?
 
 ## License
 
-Copyright © 2020 FIXME
+Copyright © 2018 FIXME
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.

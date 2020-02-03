@@ -2,5 +2,9 @@
  :deps    {}
  :aliases {:test        {:extra-paths ["test" "env"]
                          :extra-deps  {org.clojure/test.check {:mvn/version "0.10.0"}}}
-           :test-runner {:extra-deps {lambdaisland/kaocha {:mvn/version "0.0-565"}}
+           :cljs        {:extra-deps {org.clojure/clojurescript {:mvn/version "1.10.597"}
+                                      thheller/shadow-cljs      {:mvn/version "2.8.83"}
+                                      metosin/spec-tools        {:mvn/version "0.10.1"}
+                                      lambdaisland/kaocha-cljs  {:mvn/version "0.0-68"}}}
+           :test-runner {:extra-deps {lambdaisland/kaocha {:mvn/version "0.0-581"}}
                          :main-opts  ["-m" "kaocha.runner"]}}}

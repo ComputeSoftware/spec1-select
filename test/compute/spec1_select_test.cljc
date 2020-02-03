@@ -1,8 +1,9 @@
 (ns compute.spec1-select-test
   (:require
-    [clojure.test :refer :all]
+    [clojure.test :refer [deftest is testing]]
     [clojure.spec.alpha :as s]
     [clojure.test.check.generators :as gen]
+    [spec-tools.data-spec :as ds]
     [compute.spec1-select :as ssel]))
 
 (s/def ::street string?)
@@ -31,34 +32,6 @@
 (s/def ::foods-user (ssel/select ::user [::id {::foods [::food-name]}]))
 (s/def ::user-all-addr-partial (ssel/select ::user '[* {::addr [::zip]}]))
 
-(def schema-test-data
-  [{:name     "empty map"
-    :expected {`s/conform {}}
-    :actual   [::user {}]}
-   {:name     "no nesting map"
-    :expected {`s/conform {::id 1}}
-    :actual   [::user {::id 1}]}
-   {:name     "map with nesting"
-    :expected {`s/conform {::id   1
-                           ::addr {::zip 99999}}}
-    :actual   [::user {::id   1
-                       ::addr {::zip 99999}}]}
-   {:name     "invalid no nesting"
-    :expected {`s/conform ::s/invalid}
-    :actual   [::user {::id "not-id"}]}
-   {:name     "invalid nesting"
-    :expected {`s/conform ::s/invalid}
-    :actual   [::user {::id   1
-                       ::addr {::zip "invalid"}}]}])
-
-(defmacro expand-test-data
-  [test-data spec-fn]
-  (let [test-forms (map (fn [{:keys [name expected actual]}]
-                          `(testing ~name
-                             (is (= ~(get expected spec-fn) (~spec-fn ~@actual)))))
-                        (eval test-data))]
-    `(do ~@test-forms)))
-
 (deftest schema-conform-test
   (testing "empty map"
     (is (= {} (s/conform ::user {}))))
@@ -72,10 +45,10 @@
                       {::id   1
                        ::addr {::zip 99999}}))))
   (testing "invalid no nesting"
-    (is (= :clojure.spec.alpha/invalid
+    (is (= ::s/invalid
            (s/conform ::user {::id "not-id"}))))
   (testing "invalid nesting"
-    (is (= :clojure.spec.alpha/invalid
+    (is (= ::s/invalid
            (s/conform ::user
                       {::id   1
                        ::addr {::zip "invalid"}})))))
@@ -162,32 +135,37 @@
   (testing "empty map is invalid"
     (is (= {::s/problems (list {:in   []
                                 :path []
-                                :pred '(clojure.core/fn
-                                         [%]
-                                         (clojure.core/contains? % ::id))
+                                :pred (list
+                                        `fn
+                                        ['%]
+                                        (list `contains? '% ::id))
                                 :val  {}
                                 :via  [::movie-times-user]}
                                {:in   []
                                 :path []
-                                :pred '(clojure.core/fn
-                                         [%]
-                                         (clojure.core/contains? % ::addr))
+                                :pred (list
+                                        `fn
+                                        ['%]
+                                        (list `contains? '% ::addr))
                                 :val  {}
                                 :via  [::movie-times-user]})
             ::s/spec     ::movie-times-user
             ::s/value    {}}
            (s/explain-data ::movie-times-user {}))))
+
   (testing "valid map"
     (is (= nil
            (s/explain-data ::movie-times-user {::id   1
                                                ::addr {::zip 9999}}))))
+
   (testing "nested map missing key"
     (is (= {::s/problems (list
                            {:in   [::addr]
                             :path [::addr]
-                            :pred '(clojure.core/fn
-                                     [%]
-                                     (clojure.core/contains? % ::zip))
+                            :pred (list
+                                    `fn
+                                    ['%]
+                                    (list `contains? '% ::zip))
                             :val  {}
                             :via  [::movie-times-user ::addr]})
             ::s/spec     ::movie-times-user
@@ -195,28 +173,31 @@
                                                      :id   1}}
            (s/explain-data ::movie-times-user {::id   1
                                                ::addr {}}))))
+
   (testing "wildcard invalid"
     (is (= {::s/problems (list
                            {:in   []
                             :path []
-                            :pred '(clojure.core/fn
-                                     [%]
-                                     (clojure.core/contains? % ::last))
-                            :val  #:compute.spec1-select-test{:addr  {}
-                                                              :first ""
-                                                              :foods []
-                                                              :id    1}
-                            :via  [:compute.spec1-select-test/user-all-addr-partial]})
-            ::s/spec     :compute.spec1-select-test/user-all-addr-partial
-            ::s/value    #:compute.spec1-select-test{:addr  {}
-                                                     :first ""
-                                                     :foods []
-                                                     :id    1}}
+                            :pred (list
+                                    `fn
+                                    ['%]
+                                    (list `contains? '% ::last))
+                            :val  {::addr  {}
+                                   ::first ""
+                                   ::foods []
+                                   ::id    1}
+                            :via  [::user-all-addr-partial]})
+            ::s/spec     ::user-all-addr-partial
+            ::s/value    {::addr  {}
+                          ::first ""
+                          ::foods []
+                          ::id    1}}
            (s/explain-data ::user-all-addr-partial
                            {::id    1
                             ::first ""
                             ::foods []
                             ::addr  {}}))))
+
   (testing "wildcard valid"
     (is (= nil
            (s/explain-data ::user-all-addr-partial
@@ -231,11 +212,12 @@
            (s/explain-data ::foods-user
                            {::id    1
                             ::foods [{::food-name "foo"}]}))))
+
   (testing "nested collection invalid"
     (is (= {::s/problems (list
                            {:in   [::foods 0 ::food-name]
                             :path [::foods ::food-name]
-                            :pred 'clojure.core/string?
+                            :pred `string?
                             :val  1
                             :via  [::foods-user
                                    ::foods
@@ -258,13 +240,19 @@
 
 (deftest select-gen
   (testing ""
-    (is (= {::addr {::zip -1} ::id 0}
+    (is (= #?(:clj  {::addr {::zip -1} ::id 1}
+              :cljs {::addr {::zip 0 ::street "G"} ::id 0})
            (gen/generate (s/gen ::movie-times-user) 1 1))))
   (testing "wildcard"
-    (is (= {::foods [{::food-name ""}
-                     {::food-name ""}]
-            ::addr  {::zip -1 ::street ""}
-            ::last  ""
-            ::first ""
-            ::id    0}
-           (gen/generate (s/gen ::user-all-addr-partial) 0 0)))))
+    (is (= #?(:clj  {::foods [{::food-name ""}
+                              {::food-name ""}]
+                     ::addr  {::zip -1 ::street ""}
+                     ::last  ""
+                     ::first ""
+                     ::id    0}
+              :cljs {::id    -1,
+                     ::first "",
+                     ::last  "",
+                     ::addr  {::zip 0},
+                     ::foods [{} {::food-name ""}]})
+           (gen/generate (s/gen ::user-all-addr-partial) 0 #?(:clj 0 :cljs 11))))))

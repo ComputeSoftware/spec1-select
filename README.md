@@ -1,4 +1,5 @@
-# spec1-select
+# spec1-select 
+[![CircleCI](https://circleci.com/gh/ComputeSoftware/spec1-select.svg?style=svg)](https://circleci.com/gh/ComputeSoftware/spec1-select)
 
 Adds support for Spec2's [`schema` and `select`](https://github.com/clojure/spec-alpha2/wiki/Schema-and-select) to Spec1. 
 
@@ -11,7 +12,7 @@ compute/spec1-select {:git/url "https://github.com/ComputeSoftware/spec1-select.
 
 ### Usage with CLJS
 
-To use this library in CLJS, you must add [spec-tools](https://github.com/metosin/spec-tools) to your deps. spec-tools allows us to easily define Specs at runtime. Happy to accept PRs to remove this dependency.
+To use this library in CLJS, you must add [spec-tools](https://github.com/metosin/spec-tools) to your deps. spec-tools allows us to easily define Specs at runtime. Happy to accept PRs to remove this dependency. When used in Clojure, spec-tools is **not** required.
 
 
 ## Rationale

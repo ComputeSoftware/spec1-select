@@ -239,7 +239,7 @@
 
 (deftest select-gen
   (testing ""
-    (is (= #?(:clj  {::addr {::zip -1} ::id 1}
+    (is (= #?(:clj  {::addr {::zip -1} ::id 0}
               :cljs {::addr {::zip 0 ::street "G"} ::id 0})
            (gen/generate (s/gen ::movie-times-user) 1 1))))
   (testing "wildcard"

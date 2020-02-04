@@ -3,7 +3,6 @@
     [clojure.test :refer [deftest is testing]]
     [clojure.spec.alpha :as s]
     [clojure.test.check.generators :as gen]
-    [spec-tools.data-spec :as ds]
     [compute.spec1-select :as ssel]))
 
 (s/def ::street string?)

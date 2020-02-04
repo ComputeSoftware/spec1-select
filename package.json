@@ -1,0 +1,10 @@
+{
+  "name": "spec1-select",
+  "dependencies": {},
+  "devDependencies": {
+    "karma": "4.1.0",
+    "karma-chrome-launcher": "2.2.0",
+    "karma-cljs-test": "0.1.0",
+    "shadow-cljs": "2.8.83"
+  }
+}

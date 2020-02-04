@@ -1,0 +1,14 @@
+{:deps   {:aliases [:test :cljs]}
+ :nrepl  {:port 9999}
+ :builds {#_#_:app {:target   :browser
+                    :modules  {:main {:entries [compute.ui.core]}}
+                    :devtools {:http-root    "resources/public"
+                               :http-port    3000
+                               :http-handler shadow.http.push-state/handle
+                               :preloads     [devtools.preload
+                                              day8.re-frame-10x.preload
+                                              dev.preload]}}
+          :node-test {:target    :node-test
+                      :output-to "out/node-tests.js"}
+          :ci-tests  {:target    :karma
+                      :output-to "target/ci.js"}}}

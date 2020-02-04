@@ -9,6 +9,11 @@ compute/spec1-select {:git/url "https://github.com/ComputeSoftware/spec1-select.
                       :sha     "<most recent sha>"}
 ```
 
+### Usage with CLJS
+
+To use this library in CLJS, you must add [spec-tools](https://github.com/metosin/spec-tools) to your deps. spec-tools allows us to easily define Specs at runtime. Happy to accept PRs to remove this dependency.
+
+
 ## Rationale
 
 Looking for schema/select rationale? Go [here](https://github.com/clojure/spec-alpha2/wiki/Schema-and-select). 

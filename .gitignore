@@ -2,3 +2,7 @@
 .cpcache
 .nrepl-port
 *.iml
+node_modules
+out
+.shadow-cljs
+.cljs_node_repl

@@ -2,7 +2,7 @@ version: 2.1
 
 defaults: &defaults
   docker:
-    - image: circleci/clojure:tools-deps-1.10.1.502
+    - image: circleci/clojure:tools-deps-1.10.1.502-node
 
 jobs:
   test:
@@ -16,7 +16,16 @@ jobs:
             - project-{{ checksum "deps.edn" }}
             - project
 
-      - run: clojure -A:test:test-runner --reporter kaocha.report/documentation --plugin profiling
+      - run:
+          name: Clojure tests
+          command: clojure -A:test:test-runner --reporter kaocha.report/documentation --plugin profiling
+      - run:
+          # TODO: Replace with Kaocha
+          # Tried using Kaocha but it always fails with: clojure.lang.ExceptionInfo: Kaocha ClojureScript client failed connecting back.
+          name: ClojureScript tests
+          command: |
+            npm install
+            ./bin/run-cljs-tests.sh
 
       - save_cache:
           paths:

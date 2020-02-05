@@ -28,7 +28,7 @@
 
 (s/def ::user-or-id
   (s/or :id ::id
-        :user map?))
+        :user ::user))
 
 
 (s/def ::movie-times-user (ssel/select ::user [::id ::addr {::addr [::zip]}]))

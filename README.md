@@ -129,7 +129,7 @@ Not supported yet... Might be easy to add?
 
 ## License
 
-Copyright © 2018 FIXME
+Copyright © 2020 Compute Software
 
-Distributed under the Eclipse Public License either version 1.0 or (at
+Distributed under the Eclipse Public License either version 2.0 or (at
 your option) any later version.

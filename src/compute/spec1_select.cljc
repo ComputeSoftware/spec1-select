@@ -44,14 +44,19 @@
 
         s/Spec
         (conform* [_ m]
-          (let [req-ks (set (req-ks-f *conform-path*))
-                ks (set (keys m))]
-            (if (not (sets/subset? req-ks ks))
+          (let [req-ks (set (req-ks-f *conform-path*))]
+            (cond
+              (not (map? m))
               ::s/invalid
+              (not (sets/subset? req-ks (set (keys m))))
+              ::s/invalid
+              :else
               (reduce-kv
                 (fn [m attr v]
                   (let [c (binding [*conform-path* (conj *conform-path* attr)]
-                            (s/conform attr v))]
+                            (if (s/get-spec attr)
+                              (s/conform attr v)
+                              v))]
                     (if (s/invalid? c)
                       (reduced c)
                       (assoc m attr c))))

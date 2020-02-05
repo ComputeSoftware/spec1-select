@@ -26,6 +26,10 @@
 (s/def ::last string?)
 (s/def ::user (ssel/schema [::id ::first ::last ::addr ::foods]))
 
+(s/def ::user-or-id
+  (s/or :id ::id
+        :user map?))
+
 
 (s/def ::movie-times-user (ssel/select ::user [::id ::addr {::addr [::zip]}]))
 (s/def ::foods-user (ssel/select ::user [::id {::foods [::food-name]}]))
@@ -50,7 +54,13 @@
     (is (= ::s/invalid
            (s/conform ::user
                       {::id   1
-                       ::addr {::zip "invalid"}})))))
+                       ::addr {::zip "invalid"}}))))
+  (testing "valid or"
+    (is (= [:id 1]
+           (s/conform ::user-or-id 1))))
+  (testing "invalid or"
+    (is (= ::s/invalid
+           (s/conform ::user-or-id "")))))
 
 (deftest schema-explain-test
   (testing "empty map"

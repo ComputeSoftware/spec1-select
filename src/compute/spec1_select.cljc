@@ -11,6 +11,29 @@
 (def ^:dynamic *req-paths* nil)
 (def ^:dynamic *conform-path* [])
 
+(defn- get-spec-object
+  "Returns the s/Spec object for the given spec-form. Recurses until either nil
+  or a s/Spec implementation is returned."
+  [spec-form]
+  (if (satisfies? s/Spec spec-form)
+    spec-form
+    (let [s (s/get-spec spec-form)]
+      (if s
+        (if (satisfies? s/Spec s)
+          s
+          (get-spec-object s))
+        nil))))
+
+(defprotocol Schema
+  (keyspecs* [spec] "Returns map of key to symbolic spec"))
+
+(defprotocol Select
+  "Marker protocol for selects")
+
+(defn select?
+  [x]
+  (satisfies? Select x))
+
 (defn- make-keys-spec
   [req opt]
   #?(:clj
@@ -27,6 +50,10 @@
 
 (defn schema-impl
   [{::keys [keys-vec gfn]}]
+  ;; As per Spec2, schemas cannot have nested select specs
+  ;; https://github.com/clojure/spec-alpha2/blob/495e5ac3238be002b4de72d1c48479f6bec06bb3/src/main/clojure/clojure/alpha/spec/impl.clj#L421
+  (assert (every? #(not (select? (get-spec-object %))) keys-vec)
+          "Schemas cannot contain nested select specs.")
   (let [path->req-ks (fn []
                        (reduce
                          (fn [path->req-ks path]
@@ -36,70 +63,58 @@
 
         get-spec (fn [path]
                    (make-keys-spec (req-ks-f path) keys-vec))]
-    (with-meta
-      (reify
-        s/Specize
-        (specize* [s] s)
-        (specize* [s _] s)
+    (reify
+      Schema
+      (keyspecs* [_]
+        (into {} (map #(vector % %)) keys-vec))
+      s/Specize
+      (specize* [s] s)
+      (specize* [s _] s)
 
-        s/Spec
-        (conform* [_ m]
-          (let [req-ks (set (req-ks-f *conform-path*))]
-            (cond
-              (not (map? m))
-              ::s/invalid
-              (not (sets/subset? req-ks (set (keys m))))
-              ::s/invalid
-              :else
-              (reduce-kv
-                (fn [m attr v]
-                  (let [c (binding [*conform-path* (conj *conform-path* attr)]
-                            (if (s/get-spec attr)
-                              (s/conform attr v)
-                              v))]
-                    (if (s/invalid? c)
-                      (reduced c)
-                      (assoc m attr c))))
-                {} m))))
-        (unform* [_ m]
-          (s/unform (get-spec []) m))
-        (explain* [_ path via in x]
-          (s/explain* (get-spec path) path via in x))
-        (gen* [_ overrides path rmap]
-          (if gfn
-            (gfn)
-            (s/gen* (get-spec path) overrides path rmap)))
-        (with-gen* [_ gfn]
-          (schema-impl {::keys-vec keys-vec
-                        ::gfn      gfn}))
-        (describe* [_]
-          `(schema ~keys-vec)))
-      {::keys keys-vec})))
+      s/Spec
+      (conform* [_ m]
+        (let [req-ks (set (req-ks-f *conform-path*))]
+          (cond
+            (not (map? m))
+            ::s/invalid
+            (not (sets/subset? req-ks (set (keys m))))
+            ::s/invalid
+            :else
+            (reduce-kv
+              (fn [m attr v]
+                (let [c (binding [*conform-path* (conj *conform-path* attr)]
+                          (if (s/get-spec attr)
+                            (s/conform attr v)
+                            v))]
+                  (if (s/invalid? c)
+                    (reduced c)
+                    (assoc m attr c))))
+              {} m))))
+      (unform* [_ m]
+        (s/unform (get-spec []) m))
+      (explain* [_ path via in x]
+        (s/explain* (get-spec path) path via in x))
+      (gen* [_ overrides path rmap]
+        (if gfn
+          (gfn)
+          (s/gen* (get-spec path) overrides path rmap)))
+      (with-gen* [_ gfn]
+        (schema-impl {::keys-vec keys-vec
+                      ::gfn      gfn}))
+      (describe* [_]
+        `(schema ~keys-vec)))))
 
 #?(:clj
    (defmacro schema
      [keys-vec]
      `(schema-impl {::keys-vec ~keys-vec})))
 
-(defn get-spec-object
-  "Returns the s/Spec object for the given spec-form. Recurses until either nil
-  or a s/Spec implementation is returned."
-  [spec-form]
-  (if (satisfies? s/Spec spec-form)
-    spec-form
-    (let [s (s/get-spec spec-form)]
-      (if s
-        (if (satisfies? s/Spec s)
-          s
-          (get-spec-object s))
-        nil))))
-
 (defn schema-keys
   [spec]
   (-> spec
       (get-spec-object)
-      (meta)
-      ::keys))
+      (keyspecs*)
+      (keys)))
 
 #?(:clj
    (defmacro union
@@ -169,6 +184,8 @@
         flat-paths (flatten-selection selection)
         schema-spec (get-spec-object schema)]
     (reify
+      Select
+
       s/Specize
       (specize* [s] s)
       (specize* [s _] s)

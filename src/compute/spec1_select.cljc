@@ -19,9 +19,7 @@
     spec-form
     (let [s (s/get-spec spec-form)]
       (if s
-        (if (satisfies? s/Spec s)
-          s
-          (get-spec-object s))
+        (get-spec-object s)
         nil))))
 
 (defprotocol Schema
@@ -52,7 +50,7 @@
   [{::keys [keys-vec gfn]}]
   ;; As per Spec2, schemas cannot have nested select specs
   ;; https://github.com/clojure/spec-alpha2/blob/495e5ac3238be002b4de72d1c48479f6bec06bb3/src/main/clojure/clojure/alpha/spec/impl.clj#L421
-  (assert (every? #(not (select? (get-spec-object %))) keys-vec)
+  (assert (every? #(not (select? (s/get-spec %))) keys-vec)
           "Schemas cannot contain nested select specs.")
   (let [path->req-ks (fn []
                        (reduce
@@ -67,6 +65,7 @@
       Schema
       (keyspecs* [_]
         (into {} (map #(vector % %)) keys-vec))
+
       s/Specize
       (specize* [s] s)
       (specize* [s _] s)

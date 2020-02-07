@@ -115,18 +115,21 @@
       (keyspecs*)
       (keys)))
 
+(defn merge-schemas
+  [schemas]
+  (into []
+        (comp
+          (mapcat (fn [keyset]
+                    (if (vector? keyset)
+                      keyset
+                      (schema-keys keyset))))
+          (distinct))
+        schemas))
+
 #?(:clj
    (defmacro union
      [& schemas]
-     (let [keys-vec (into []
-                          (comp
-                            (mapcat (fn [keyset]
-                                      (if (vector? keyset)
-                                        keyset
-                                        (schema-keys keyset))))
-                            (distinct))
-                          schemas)]
-       `(schema ~keys-vec))))
+     `(schema-impl (merge-schemas ~schemas))))
 
 (defn flatten-selection
   ([selection] (flatten-selection [] selection))

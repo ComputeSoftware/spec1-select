@@ -129,7 +129,7 @@
 #?(:clj
    (defmacro union
      [& schemas]
-     `(schema-impl (merge-schemas ~schemas))))
+     `(schema-impl {::keys-vec (merge-schemas ~(vec schemas))})))
 
 (defn flatten-selection
   ([selection] (flatten-selection [] selection))

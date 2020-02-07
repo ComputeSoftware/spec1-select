@@ -60,7 +60,12 @@
            (s/conform ::user-or-id 1))))
   (testing "invalid or"
     (is (= ::s/invalid
-           (s/conform ::user-or-id "")))))
+           (s/conform ::user-or-id ""))))
+
+  (testing "schema with nested select throws"
+    (is (thrown? #?(:clj  AssertionError
+                    :cljs js/Error)
+                 (ssel/schema [::movie-times-user])))))
 
 (deftest schema-explain-test
   (testing "empty map"

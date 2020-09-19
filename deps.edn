@@ -6,5 +6,7 @@
            :cljs        {:extra-deps {org.clojure/clojurescript {:mvn/version "1.10.773"}
                                       thheller/shadow-cljs      {:mvn/version "2.11.4"}
                                       lambdaisland/kaocha-cljs  {:mvn/version "0.0-71"}}}
+           :jar         {:extra-deps {seancorfield/depstar {:mvn/version "1.1.117"}}
+                         :main-opts ["-m" "hf.depstar.jar" "lib.jar"]}
            :test-runner {:extra-deps {lambdaisland/kaocha {:mvn/version "1.0.700"}}
                          :main-opts  ["-m" "kaocha.runner"]}}}

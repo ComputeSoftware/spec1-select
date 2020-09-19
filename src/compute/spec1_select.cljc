@@ -299,7 +299,7 @@
 
 (defmacro union
   [& schemas]
-  `(union-impl ~schemas nil))
+  `(union-impl '~schemas nil))
 
 (comment
   (s/def ::name string?)

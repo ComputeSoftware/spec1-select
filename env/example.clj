@@ -21,6 +21,7 @@
 
 (comment
   (gen/sample (s/gen ::user) 5)
+  (gen/sample (s/gen ::company-addr) 5)
   )
 
 
@@ -44,7 +45,7 @@
                                   ::state  "IL" ::zip 12345}})
 
 (comment
-  (s/explain ::place-order {::first "Alex" ::last "Miller" ::addr {::state "IL"}})
+  (s/explain-data ::place-order {::first "Alex" ::last "Miller" ::addr {::state "IL"}})
   (gen/sample (s/gen ::place-order) 3)
   )
 

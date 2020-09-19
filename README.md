@@ -60,9 +60,9 @@ All of these examples are available in the `env/user.clj` namespace.
 (gen/sample (s/gen ::user) 5)
 =>
 ({}
- #:user{:addr #:user{:zip -1, :city "A"}, :last "", :first ""}
- #:user{:addr #:user{:city "Br", :street ""}}
- #:user{:addr #:user{:zip 0, :street "p"}, :first "56", :id -1}
+ #:example{:addr #:example{:zip -1, :city "A"}, :last "", :first ""}
+ #:example{:addr #:example{:city "Br", :street ""}}
+ #:example{:addr #:example{:zip 0, :street "p"}, :first "56", :id -1}
  {})
 ```
 
@@ -77,11 +77,11 @@ Not supported yet... Might be easy to add?
 
 (gen/sample (s/gen ::movie-times-user) 5)
 =>
-(#:user{:addr #:user{:zip -1, :state "", :city ""}, :first "", :id -1}
- #:user{:addr #:user{:zip -1, :state "", :city "L", :street "f"}, :last "", :first "", :id 0}
- #:user{:addr #:user{:zip 1}, :id 0}
- #:user{:addr #:user{:zip -1, :state "cO3", :city "", :street "5"}, :last "", :first "Y", :id 0}
- #:user{:addr #:user{:zip 0, :city "lC9", :street "i"}, :id 0})
+(#:example{:addr #:example{:zip -1, :state "", :city ""}, :first "", :id -1}
+ #:example{:addr #:example{:zip -1, :state "", :city "L", :street "f"}, :last "", :first "", :id 0}
+ #:example{:addr #:example{:zip 1}, :id 0}
+ #:example{:addr #:example{:zip -1, :state "cO3", :city "", :street "5"}, :last "", :first "Y", :id 0}
+ #:example{:addr #:example{:zip 0, :city "lC9", :street "i"}, :id 0})
 ```
 
 ### place-order
@@ -95,18 +95,18 @@ Not supported yet... Might be easy to add?
 
 ```clojure
 (s/explain ::place-order {::first "Alex" ::last "Miller" ::addr {::state "IL"}})
-#:user{:state "IL"} - failed: (contains? % :user/street) in: [:user/addr] at: [:user/addr] spec: :user/addr
-#:user{:state "IL"} - failed: (contains? % :user/city) in: [:user/addr] at: [:user/addr] spec: :user/addr
-#:user{:state "IL"} - failed: (contains? % :user/zip) in: [:user/addr] at: [:user/addr] spec: :user/addr
+#:example{:state "IL"} - failed: (contains? % :user/street) in: [:user/addr] at: [:user/addr] spec: :user/addr
+#:example{:state "IL"} - failed: (contains? % :user/city) in: [:user/addr] at: [:user/addr] spec: :user/addr
+#:example{:state "IL"} - failed: (contains? % :user/zip) in: [:user/addr] at: [:user/addr] spec: :user/addr
 ```
 
 
 ```clojure
 (gen/sample (s/gen ::place-order) 3)
 =>
-(#:user{:addr #:user{:zip 0, :state "", :city "", :street ""}, :last "", :first ""}
- #:user{:addr #:user{:zip -1, :state "e", :city "", :street ""}, :last "", :first "Z", :id -1}
- #:user{:addr #:user{:zip -1, :state "R", :city "8", :street "G8"}, :last "X", :first "", :id 0})
+(#:example{:addr #:example{:zip 0, :state "", :city "", :street ""}, :last "", :first ""}
+ #:example{:addr #:example{:zip -1, :state "e", :city "", :street ""}, :last "", :first "Z", :id -1}
+ #:example{:addr #:example{:zip -1, :state "R", :city "8", :street "G8"}, :last "X", :first "", :id 0})
 ```
 
 ### Wildcard
@@ -114,17 +114,17 @@ Not supported yet... Might be easy to add?
 ```clojure
 (gen/sample (s/gen (ssel/select ::user ['*])) 3)
 =>
-(#:user{:addr #:user{:zip 0, :state "", :city "", :street ""}, :last "", :first "", :id 0}
- #:user{:addr #:user{:zip 0, :state "", :street "2"}, :last "", :first "0", :id -1}
- #:user{:addr #:user{:zip -2}, :last "Qm", :first "", :id -2})
+(#:example{:addr #:example{:zip 0, :state "", :city "", :street ""}, :last "", :first "", :id 0}
+ #:example{:addr #:example{:zip 0, :state "", :street "2"}, :last "", :first "0", :id -1}
+ #:example{:addr #:example{:zip -2}, :last "Qm", :first "", :id -2})
 ```
 
 ```clojure
 (gen/sample (s/gen (ssel/select ::user ['* {::addr ['*]}])) 3)
 =>
-(#:user{:addr #:user{:zip 0, :state "", :city "", :street ""}, :last "", :first "", :id 0}
- #:user{:addr #:user{:zip 0, :state "S", :city "", :street "i"}, :last "", :first "5", :id -1}
- #:user{:addr #:user{:zip 1, :state "ni", :city "1l", :street ""}, :last "C4", :first "fT", :id 1})
+(#:example{:addr #:example{:zip 0, :state "", :city "", :street ""}, :last "", :first "", :id 0}
+ #:example{:addr #:example{:zip 0, :state "S", :city "", :street "i"}, :last "", :first "5", :id -1}
+ #:example{:addr #:example{:zip 1, :state "ni", :city "1l", :street ""}, :last "C4", :first "fT", :id 1})
 ```
 
 ## License

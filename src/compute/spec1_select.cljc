@@ -149,6 +149,7 @@
   (cond
     (keyword? sform) (resolve-spec sform)
     (vector? sform) (schema-impl sform nil)
+    (map? sform) (throw (ex-info "Unqualified map schemas not yet supported" {:form sform}))
     ;(map? sform) (create-spec `{:clojure.spec/op schema, :schemas [~sform]})
     ;(c/or (list? sform) (seq? sform)) (create-spec sform)
     (nil? sform) nil
@@ -157,7 +158,7 @@
 
 (defmacro schema
   [schema-form]
-  `(schema-impl ~schema-form nil))
+  `(schema* ~schema-form))
 
 (comment
   (s/def ::food-name string?)

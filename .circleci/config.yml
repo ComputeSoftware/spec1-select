@@ -27,7 +27,7 @@ jobs:
     steps:
       - checkout
 
-      - node/npm_install
+      - node/install-packages
       - clojure/with_cache:
           steps:
             - run:

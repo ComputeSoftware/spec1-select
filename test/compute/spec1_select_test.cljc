@@ -1,5 +1,6 @@
 (ns compute.spec1-select-test
   (:require
+    [clojure.walk :as walk]
     [clojure.test :refer [deftest is testing]]
     [clojure.spec.alpha :as s]
     [clojure.test.check.generators :as gen]
@@ -147,22 +148,22 @@
 
 (deftest select-explain-test
   (testing "empty map is invalid"
-    (is (= {::s/problems (list {:in   []
-                                :path []
-                                :pred (list
-                                        `fn
-                                        ['%]
-                                        (list `contains? '% ::id))
-                                :val  {}
-                                :via  [::movie-times-user]}
-                               {:in   []
-                                :path []
-                                :pred (list
-                                        `fn
-                                        ['%]
-                                        (list `contains? '% ::addr))
-                                :val  {}
-                                :via  [::movie-times-user]})
+    (is (= {::s/problems [{:in   []
+                           :path []
+                           :pred (list
+                                   `fn
+                                   ['m]
+                                   (list `contains? 'm #?(:clj ::addr :cljs ::id)))
+                           :val  {}
+                           :via  [::movie-times-user]}
+                          {:in   []
+                           :path []
+                           :pred (list
+                                   `fn
+                                   ['m]
+                                   (list `contains? 'm #?(:clj ::id :cljs ::addr)))
+                           :val  {}
+                           :via  [::movie-times-user]}]
             ::s/spec     ::movie-times-user
             ::s/value    {}}
            (s/explain-data ::movie-times-user {}))))
@@ -173,34 +174,40 @@
                                                ::addr {::zip 9999}}))))
 
   (testing "nested map missing key"
-    (is (= {::s/problems (list
-                           {:in   [::addr]
-                            :path [::addr]
-                            :pred (list
-                                    `fn
-                                    ['%]
-                                    (list `contains? '% ::zip))
-                            :val  {}
-                            :via  [::movie-times-user ::addr]})
+    (is (= {::s/problems [{:in   [::addr]
+                           :path [::addr]
+                           :pred (list
+                                   `fn
+                                   ['m]
+                                   (list `contains? 'm ::zip))
+                           :val  {}
+                           :via  [::movie-times-user]}]
             ::s/spec     ::movie-times-user
-            ::s/value    #:compute.spec1-select-test{:addr {}
-                                                     :id   1}}
+            ::s/value    {::addr {}
+                          ::id   1}}
            (s/explain-data ::movie-times-user {::id   1
                                                ::addr {}}))))
 
   (testing "wildcard invalid"
-    (is (= {::s/problems (list
-                           {:in   []
-                            :path []
-                            :pred (list
-                                    `fn
-                                    ['%]
-                                    (list `contains? '% ::last))
-                            :val  {::addr  {}
-                                   ::first ""
-                                   ::foods []
-                                   ::id    1}
-                            :via  [::user-all-addr-partial]})
+    (is (= {::s/problems [{:in   []
+                           :path []
+                           :pred (list
+                                   `fn
+                                   ['m]
+                                   (list `contains? 'm ::last))
+                           :val  {::addr  {}
+                                  ::first ""
+                                  ::foods []
+                                  ::id    1}
+                           :via  [::user-all-addr-partial]}
+                          {:in   [::addr]
+                           :path [::addr]
+                           :pred (list
+                                   `fn
+                                   ['m]
+                                   (list `contains? 'm ::zip))
+                           :val  {}
+                           :via  [::user-all-addr-partial]}]
             ::s/spec     ::user-all-addr-partial
             ::s/value    {::addr  {}
                           ::first ""
@@ -247,26 +254,39 @@
 
 (deftest schema-gen
   (testing ""
-    (is (= {::addr {::zip -1 ::state "" ::city "" ::street "Q"}
-            ::last "8"
-            ::id   -1}
+    (is (= {::addr  {::city   ""
+                     ::state  ""
+                     ::street "9"
+                     ::zip    0}
+            ::first "8"
+            ::id    -1
+            ::last  ""}
            (gen/generate (s/gen ::user) 1 100)))))
 
 (deftest select-gen
   (testing ""
-    (is (= #?(:clj  {::addr {::zip -1} ::id 0}
-              :cljs {::addr {::zip 0 ::street "G"} ::id 0})
+    (is (= #?(:clj  {::addr {::city  ""
+                             ::state ""
+                             ::zip   0}
+                     ::id   0}
+              :cljs {::id 0, ::addr {::zip 0}})
            (gen/generate (s/gen ::movie-times-user) 1 1))))
   (testing "wildcard"
-    (is (= #?(:clj  {::foods [{::food-name ""}
-                              {::food-name ""}]
-                     ::addr  {::zip -1 ::street ""}
-                     ::last  ""
+    (is (= #?(:clj  {::addr  {::state  ""
+                              ::street ""
+                              ::zip    0}
                      ::first ""
-                     ::id    0}
+                     ::foods [{::food-name ""}
+                              {}
+                              {}
+                              {::food-name ""}
+                              {}]
+                     ::id    -1
+                     ::last  ""}
               :cljs {::id    -1,
                      ::first "",
                      ::last  "",
-                     ::addr  {::zip 0},
-                     ::foods [{} {::food-name ""}]})
+                     ::addr  {::state "", ::city "", ::street "", ::zip -1},
+                     ::foods [{::food-name ""}
+                              {::food-name ""}]})
            (gen/generate (s/gen ::user-all-addr-partial) 0 #?(:clj 0 :cljs 11))))))

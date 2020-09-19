@@ -6,3 +6,4 @@ node_modules
 out
 .shadow-cljs
 .cljs_node_repl
+*.jar

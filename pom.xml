@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>compute</groupId>
   <artifactId>spec1-select</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <name>spec1-select</name>
   <dependencies>
     <dependency>

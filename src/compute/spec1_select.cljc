@@ -70,7 +70,7 @@
         unq-specs (map resolve-spec (vals unq-map))
         uqks (zipmap (keys unq-map) unq-specs)
         key-specs (merge uqks qks)
-        lookup #(or (s/get-spec %) (get key-specs %))]
+        lookup #(or (resolve-spec %) (get key-specs %))]
     ;; schemas cannot contain nested select specs
     (assert (every? #(if-let [sp (s/get-spec %)] (not (select? sp)) true) ks))
     (assert (every? #(not (select? %)) unq-specs))
@@ -182,7 +182,7 @@
                    (->> selection (filter keyword?) set))
         sub-selects (->> selection (filter map?) (apply merge))
         lookup #(if (qualified-keyword? %)
-                  (let [schema-obj (s/get-spec %)]
+                  (let [schema-obj (resolve-spec %)]
                     (if (schema? schema-obj)
                       (let [sub-schema (vec (some-> schema-obj keyspecs keys))
                             sub-selection (get sub-selects % [])]

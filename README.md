@@ -6,7 +6,7 @@ Adds support for Spec2's [`schema` and `select`](https://github.com/clojure/spec
 ## Install
 
 ```clojure
-compute/spec1-select {:mvn/version "0.1.0"}
+compute/spec1-select {:mvn/version "0.1.1"}
 ```
 
 ## Rationale
